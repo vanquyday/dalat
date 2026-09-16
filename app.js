@@ -53,10 +53,12 @@ const SIM_PER_SEC = 34;
 
 /* ---------- crew & stats ---------- */
 $('concept').textContent = TRIP.concept + ' — bấm ▶ để xem cả nhóm tự đi theo giờ trên bản đồ.';
+const imgOr = (p, cls) => p.photo
+  ? `<img class="${cls}" src="${p.photo}" alt="${p.name}" onerror="this.remove()">` : '';
 $('crew').innerHTML = PEOPLE.map(p => `<div class="person">
-  <div class="ph">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : ''}</div>
+  <div class="ph" style="background:${p.color}"><span class="initial">${p.name[0]}</span>${imgOr(p, '')}</div>
   <div><b>${p.name}</b><span>${p.gender}</span></div></div>`).join('');
-$('mini').innerHTML = PEOPLE.map(p => `<div class="av" title="${p.name}">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : ''}</div>`).join('');
+$('mini').innerHTML = PEOPLE.map(p => `<div class="av" title="${p.name}" style="background:${p.color}"><span class="initial">${p.name[0]}</span>${imgOr(p, '')}</div>`).join('');
 const STATS = [
   [STOPS.length, 'điểm dừng'],
   [Math.round(TOTAL_KM) + ' km', 'tổng đường đi'],
@@ -102,7 +104,7 @@ function pinHtml(s, i) {
 }
 function partyHtml() {
   return `<div class="partyIcon"><div class="ring"></div>` +
-    PEOPLE.map(p => `<div class="av"><img src="${p.photo}" alt="${p.name}"></div>`).join('') + `</div>`;
+    PEOPLE.map(p => `<div class="av" style="background:${p.color}"><span class="initial">${p.name[0]}</span>${imgOr(p, '')}</div>`).join('') + `</div>`;
 }
 
 function buildDay() {
@@ -239,7 +241,7 @@ function tileFilter(m) {
 function showPhoto(s) {
   const card = $('photocard');
   if (!s || !s.photos || !s.photos.length) { card.classList.remove('on'); return; }
-  $('shots').innerHTML = s.photos.slice(0, 2).map(u => `<img src="${u}" alt="${s.title}" loading="lazy">`).join('');
+  $('shots').innerHTML = s.photos.slice(0, 2).map(u => `<img src="${u}" alt="${s.title}" loading="lazy" onerror="this.remove()">`).join('');
   $('pcTitle').textContent = s.title;
   $('pcSub').textContent = s.sub;
   card.classList.add('on');
@@ -406,7 +408,7 @@ function renderFoods() {
     return x.meal === f.toLowerCase();
   });
   $('foods').innerHTML = list.map((x, i) => `<div class="fc" style="animation-delay:${i * 45}ms">
-    ${x.photo ? `<img src="${x.photo}" alt="${x.name}" loading="lazy">`
+    ${x.photo ? `<img src="${x.photo}" alt="${x.name}" loading="lazy" onerror="this.outerHTML='<div class=&quot;ph&quot;>Ảnh chưa tải được</div>'">`
       : `<div class="ph">Chưa có ảnh — thêm link ảnh của bạn vào data.js</div>`}
     <h3>${x.name}</h3>
     <p>Ngày ${x.days.join(', ')} · ${x.meal === 'vặt' ? 'ăn vặt' : 'bữa ' + x.meal}</p></div>`).join('');

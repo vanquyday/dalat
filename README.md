@@ -10,9 +10,10 @@ Trang tĩnh, không cần build. Mở `index.html` là chạy.
    index.html
    app.js
    data.js
-   assets/organic.css
-   anh/...            (ảnh 4 người + ảnh địa điểm)
+   anh/...            (ảnh 4 người + ảnh địa điểm — PHẢI upload cả thư mục này)
    ```
+   > Nếu chữ bị mất font / ảnh hiện chữ cái thay vì hình → tức là chưa upload đủ thư mục `anh/`,
+   > hoặc đường dẫn ảnh trong `data.js` không khớp tên file (phân biệt chữ hoa/chữ thường trên GitHub).
 3. Repo → **Settings → Pages** → Source: `Deploy from a branch` → Branch: `main` / `/ (root)` → Save.
 4. Đợi 1–2 phút, link sẽ là `https://<tên-github>.github.io/dalat-3n2d/`.
 

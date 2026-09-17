@@ -93,6 +93,29 @@ $('bases').addEventListener('click', e => {
 });
 map.on('click', () => map.scrollWheelZoom.enable());
 
+/* Trên điện thoại: khoá kéo bản đồ để vuốt dọc vẫn cuộn được trang.
+   Bấm "Bấm để xem bản đồ" mới mở kéo; cuộn ra khỏi bản đồ thì khoá lại. */
+const coarse = matchMedia('(pointer:coarse)').matches || innerWidth < 680;
+const tapGuard = $('tapGuard'), mapLock = $('mapLock');
+function lockMap() {
+  if (!coarse) return;
+  map.dragging.disable();
+  tapGuard.hidden = false; mapLock.hidden = true;
+}
+function unlockMap() {
+  map.dragging.enable();
+  tapGuard.hidden = true;
+  mapLock.hidden = !coarse;
+}
+tapGuard.addEventListener('click', unlockMap);
+mapLock.addEventListener('click', lockMap);
+lockMap();
+addEventListener('scroll', () => {
+  if (!coarse || tapGuard.hidden !== true) return;
+  const r = document.querySelector('.mapcard').getBoundingClientRect();
+  if (r.bottom < 40 || r.top > innerHeight - 40) lockMap();
+}, { passive: true });
+
 let pins = [], donePoly = null, restPoly = null, partyMarker = null, dayStops = [], follow = true;
 map.on('dragstart', () => { follow = false; setTimeout(() => follow = true, 6000); });
 
@@ -196,10 +219,11 @@ function partyState() {
   }
   return { from: cur, idx: i, traveling: false, ll: cur.pll, p: 0 };
 }
-function flyToStop(s) { if (follow) map.flyTo(s.pll, ZONE[s.zone].z, { duration: 1.5 }); }
+const isPhone = () => innerWidth < 680;
+function flyToStop(s) { if (follow) map.flyTo(s.pll, ZONE[s.zone].z - (isPhone() ? 1 : 0), { duration: 1.5 }); }
 function flyToSegment(a, b) {
   if (!follow) return;
-  map.flyToBounds(L.latLngBounds([a.pll, b.pll]).pad(.35), { duration: 1.6, maxZoom: 14 });
+  map.flyToBounds(L.latLngBounds([a.pll, b.pll]).pad(.35), { duration: 1.6, maxZoom: isPhone() ? 13 : 14 });
 }
 
 /* ---------- nền trời theo giờ ---------- */
@@ -436,10 +460,11 @@ $('packing').innerHTML = PACKING.map(n => `<li>${n}</li>`).join('');
 
 /* ---------- khởi động ---------- */
 buildDay(); markDayTabs(); syncPlay();
-map.setView(dayStops[0].pll, 14);
+map.setView(dayStops[0].pll, isPhone() ? 13 : 14);
 requestAnimationFrame(frame);
 setTimeout(() => { state.playing = true; syncPlay(); }, 1200);
 const mapcard = document.querySelector('.mapcard');
 new ResizeObserver(() => map.invalidateSize()).observe(mapcard);
 addEventListener('load', () => map.invalidateSize());
+addEventListener('orientationchange', () => setTimeout(() => { map.invalidateSize(); sizeCvs(); }, 350));
 [0, 120, 400, 1200].forEach(t => setTimeout(() => map.invalidateSize(), t));
